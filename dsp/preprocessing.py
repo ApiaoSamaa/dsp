@@ -24,8 +24,9 @@ def csv2dict(infile: Path) -> Dict[str, str]:
     with open(infile, mode='rb') as reader:
         data = BytesIO(reader.read())
         data2 = deepcopy(data)
+        breakpoint()
         en = detect(data.read())['encoding']
-        reader = EncodedFile(data2, en, file_encoding='ascii')
+        reader = EncodedFile(data2, en, file_encoding='ascii') # to write the data that may in the format of 'en' to 'ascii'
         for line in reader:
             if line:
                 line = line.strip().split(b',')
@@ -80,6 +81,7 @@ def preprocessing(data_set: Union[Path, str], metadata: Optional[Path],
             if file.suffix != '.fai' and '_all_seqs.fasta' not in str(file):
                 with open(file) as infile, open(outfn, 'a') as outfile:
                     outfile.write(f'{infile.read().strip()}\n')
+    breakpoint()
     seq_dict = Fasta(
         str(outfn), key_function=replace, duplicate_action="first",
         sequence_always_upper=True

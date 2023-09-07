@@ -220,10 +220,10 @@ def one_dimensional_num_mapping_wrapper(seq: str, name: str,
     """
     @Daniel
     Args:
-        name:
-        seq:
+        name: DNA sequence file's indicator
+        seq: one piece of DNA sequence
         method:
-        results:
+        results: path dir for this process's intermidiate results
         med_len:
         label:
     Returns:
@@ -232,14 +232,17 @@ def one_dimensional_num_mapping_wrapper(seq: str, name: str,
     # normalize sequences to median seq length of cluster
     seq_new = str(seq).upper()
     if len(seq_new) >= med_len:
+        # truncate
         seq_new = seq_new[0:round(med_len)]
     num_seq = method(array(list(seq_new)))
     if len(num_seq) < med_len:
         pad_width = int(med_len - len(num_seq))
+        # TODO: check if this is the correct padding
         num_seq = pad(num_seq, pad_width, 'antisymmetric')[pad_width:]
-    method_name = f'{str(method).split()[1]}'
+    method_name = f'{str(method).split()[1]}' # using <function FUNCTION_NAME at MEMORY_ADDRESS> way to get the name
     ofname = results.joinpath('Num_rep', f'{method_name}_{name}').resolve()
     ofname.parent.mkdir(parents=True, exist_ok=True)
+    # save the program-using seq 
     save(ofname, num_seq)
     fft_output = fft.fft(num_seq)
     fft_path = results.joinpath('Num_rep','fft',f'Fourier_{name}')

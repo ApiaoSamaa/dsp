@@ -29,6 +29,8 @@ from dsp.utils import Logger, uprint, PathAction, HandleSpaces
 from dsp.visualisation import plotCGR, plot3d, \
     displayConfusionMatrix
 
+from tryCSV import train_path
+train_label_path = train_path.parent / 'Primates.csv'
 
 def startCalcProcess_test(query_seq_path: Path, run_name: str,
                           output_directory: Union[Path, str],
@@ -196,7 +198,9 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
     try:
         results_path.mkdir(parents=True, exist_ok=False)
     except FileExistsError:
-        if any(results_path.glob('[!prints.txt]')):
+        # TODO ? What does this mean?
+        # if any(results_path.glob('[!prints.txt]')):
+        if any(file for file in results_path.glob('*') if file.name != 'prints.txt'):
             raise Exception("This output directory already exists, "
                             "consider changing the directory or Run name")
     log = Logger(results_path, f'Training_Run_{run_name}.log')
@@ -204,17 +208,17 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
               f'\nMedian seq length: {med_len} Shortest sequence: {min_len} '
               f'Longest sequence: {max_len}\n'
               f'Dataset size: {total_seq}\n')
-
+    breakpoint()
     uprint('Generating numerical sequences, applying DFT, computing '
            'magnitude spectra .... \n', print_file=print_file)
     # Calculate num. representation, FFT and CGR in parallel
+    # TODO: is this cpu or gpu task?
     parallel_results = Parallel(n_jobs=cpus)(
         delayed(compute)(seq=str(seq_dict[name]), name=name, kmer=kmer,
                          results=results_path, order=order, med_len=med_len,
                          method=methods_list[method], label=cluster_dict[name]
                          ) for name in seq_dict.keys()
     )
-
     abs_fft_output, fft_output, cgr_output, labels = zip(*parallel_results)
     log.write(f'Class sizes:\n')
     class_sizes = Counter(labels)
@@ -300,10 +304,12 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
 def execute():
     opt = ArgumentParser(usage='%(prog)s data_set_path metadata [options]',
                          formatter_class=ArgumentDefaultsHelpFormatter)
-    opt.add_argument('train_set', help='Path to data set to train the'
-                                       ' models with', action=PathAction)
-    opt.add_argument('train_labels', help='CSV with the mapping of labels '
-                                          'and sequence names')
+    opt.add_argument('--train_set', help='Path to data set to train the'
+                                       ' models with', action=PathAction,
+                                       default=train_path)
+    opt.add_argument('--train_labels', help='CSV with the mapping of labels '
+                                          'and sequence names',
+                                          default=train_label_path,)
     opt.add_argument('--query_seq_path', '-q', action=PathAction,
                      default=None, help='Path to test set fasta(s)')
     opt.add_argument('--run_name', '-r', help='Name of the run',

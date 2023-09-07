@@ -1,0 +1,11 @@
+numpy
+scipy
+pandas
+sklearn
+PyWavelets
+chardet
+pyfaidx
+matplotlib
+plotly
+dill
+joblib
