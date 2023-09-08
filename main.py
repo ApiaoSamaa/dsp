@@ -180,7 +180,10 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
         train_set, train_labels, print_file=print_file,
         output_path=results_path)
     # Get dataset statistics & print
-    seqs_len = [len(x) for x in seq_dict.values()]
+    seqs_len = []
+    for i in range(len(seq_dict)):
+        new_seqs_len = [len(x) for x in seq_dict[i].values()]
+        seqs_len.append(new_seqs_len)
     med_len = median(seqs_len)
     max_len = max(seqs_len)
     min_len = min(seqs_len)
@@ -198,8 +201,7 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
     try:
         results_path.mkdir(parents=True, exist_ok=False)
     except FileExistsError:
-        # TODO ? What does this mean?
-        # if any(results_path.glob('[!prints.txt]')):
+        # can't appear file that have name prints.txt
         if any(file for file in results_path.glob('*') if file.name != 'prints.txt'):
             raise Exception("This output directory already exists, "
                             "consider changing the directory or Run name")
@@ -213,13 +215,27 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
            'magnitude spectra .... \n', print_file=print_file)
     # Calculate num. representation, FFT and CGR in parallel
     # TODO: is this cpu or gpu task?
-    parallel_results = Parallel(n_jobs=cpus)(
-        delayed(compute)(seq=str(seq_dict[name]), name=name, kmer=kmer,
-                         results=results_path, order=order, med_len=med_len,
-                         method=methods_list[method], label=cluster_dict[name]
-                         ) for name in seq_dict.keys()
-    )
-    abs_fft_output, fft_output, cgr_output, labels = zip(*parallel_results)
+    # parallel result will be a list of all results
+    parallel_results = []
+    for i in range(len(seq_dict)):
+        new_parallel_results = Parallel(n_jobs=cpus)(
+            delayed(compute)(seq=str(seq_dict[name]), name=name, kmer=kmer,
+                            results=results_path, order=order, med_len=med_len,
+                            method=methods_list[method], label=cluster_dict[name]
+                            ) for name in seq_dict.keys()
+        )
+        parallel_results.append(new_parallel_results)
+    abs_fft_output = []
+    fft_output = []
+    cgr_output = []
+    labels = []
+    for i in range(len(parallel_results)):
+        new_abs_fft_output, new_fft_output, new_cgr_output, new_labels = zip(*parallel_results[i])
+        abs_fft_output.append(new_abs_fft_output)
+        fft_output.append(new_fft_output)
+        cgr_output.append(new_cgr_output)
+        labels.append(new_labels)
+    # cgr_output is useless??
     log.write(f'Class sizes:\n')
     class_sizes = Counter(labels)
     [log.write(f'{key}:{value}, ') for (key, value) in class_sizes.items()]

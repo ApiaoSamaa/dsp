@@ -77,21 +77,47 @@ def preprocessing(data_set: Union[Path, str], metadata: Optional[Path],
         uprint(f'File {outfn.name} exists and will be used! If this is '
                f'unintended, please remove the file\n', print_file=print_file)
     else:
-        for file in data_set.glob('[!.]*'):
-            if file.suffix != '.fai' and '_all_seqs.fasta' not in str(file):
-                with open(file) as infile, open(outfn, 'a') as outfile:
-                    outfile.write(f'{infile.read().strip()}\n')
+        subdirs = [subdir for subdir in outfn.iterdir() if subdir.is_dir()]
+        if not subdirs:
+            for file in data_set.glob('[!.]*'):
+                if file.suffix != '.fai' and '_all_seqs.fasta' not in str(file):
+                    with open(file) as infile, open(outfn, 'a') as outfile:
+                        outfile.write(f'{infile.read().strip()}\n')
+        else:
+            for subdir in subdirs:
+                for file in subdir.glob('[!.]*'):
+                    if file.suffix != '.fai' and '_all_seqs.fasta' not in str(file):
+                        suboutfn = outfn.parent / subdir.name / outfn.name
+                        suboutfn.parent.mkdir(parents=True, exist_ok=True)
+                        with open(file) as infile, open(suboutfn, 'a') as outfile:
+                            outfile.write(f'{infile.read().strip()}\n')
+                            
     breakpoint()
-    seq_dict = Fasta(
-        str(outfn), key_function=replace, duplicate_action="first",
-        sequence_always_upper=True
-    )
+    if not subdirs:
+        seq_dict = []
+        new_seq = Fasta(
+            str(outfn), key_function=replace, duplicate_action="first",
+            sequence_always_upper=True
+        )
+        seq_dict.append(new_seq)
+    else:
+        seq_dict = []
+        for subdir in subdirs:
+            suboutfn = outfn.parent / subdir.name / outfn.name
+            new_seq = Fasta(
+                str(suboutfn), key_function=replace, duplicate_action="first",
+                sequence_always_upper=True
+            )
+            seq_dict.append(new_seq)
     #Check all samples in fasta are present in metadata (reverse need not be true)
     if metadata is not None:
-        difference = set(seq_dict.keys()).difference(cluster_dict.keys())
-        if difference:
+        difference = [set(seq_dict[i].keys()).difference(cluster_dict.keys()) for i in range(len(seq_dict))]
+        if all(difference):
             raise Exception(f"{''.join(difference)}"
                             f"Your metadata and your fasta don't match,"
                             f" check your input\nCulprit(s): ")
-    total_seq = len(seq_dict.keys())
+    total_seq = 0
+    for i in range(len(seq_dict)):
+        new_total_seq = len(seq_dict[i].keys())
+        total_seq += new_total_seq
     return seq_dict, total_seq, cluster_dict
