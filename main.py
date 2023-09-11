@@ -29,8 +29,7 @@ from dsp.utils import Logger, uprint, PathAction, HandleSpaces
 from dsp.visualisation import plotCGR, plot3d, \
     displayConfusionMatrix
 
-from tryCSV import train_path
-train_label_path = train_path.parent / 'Primates.csv'
+from tryCSV import train_path, train_label_path
 
 def startCalcProcess_test(query_seq_path: Path, run_name: str,
                           output_directory: Union[Path, str],
@@ -183,7 +182,7 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
     seqs_len = []
     for i in range(len(seq_dict)):
         new_seqs_len = [len(x) for x in seq_dict[i].values()]
-        seqs_len.append(new_seqs_len)
+        seqs_len.extend(new_seqs_len)
     med_len = median(seqs_len)
     max_len = max(seqs_len)
     min_len = min(seqs_len)
@@ -201,16 +200,17 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
     try:
         results_path.mkdir(parents=True, exist_ok=False)
     except FileExistsError:
+        subdir_list = [subdir for subdir in results_path.iterdir() if subdir.is_dir()]
         # can't appear file that have name prints.txt
-        if any(file for file in results_path.glob('*') if file.name != 'prints.txt'):
-            raise Exception("This output directory already exists, "
+        if not subdir_list:
+            if any(file for file in results_path.glob('*') if file.name != 'prints.txt'):
+                raise Exception("This output directory already exists, "
                             "consider changing the directory or Run name")
     log = Logger(results_path, f'Training_Run_{run_name}.log')
     log.write(f'Run_name: {run_name}\nMethod: {method}\nkmer: {kmer}'
               f'\nMedian seq length: {med_len} Shortest sequence: {min_len} '
               f'Longest sequence: {max_len}\n'
               f'Dataset size: {total_seq}\n')
-    breakpoint()
     uprint('Generating numerical sequences, applying DFT, computing '
            'magnitude spectra .... \n', print_file=print_file)
     # Calculate num. representation, FFT and CGR in parallel
@@ -219,22 +219,21 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
     parallel_results = []
     for i in range(len(seq_dict)):
         new_parallel_results = Parallel(n_jobs=cpus)(
-            delayed(compute)(seq=str(seq_dict[name]), name=name, kmer=kmer,
+            delayed(compute)(seq=str(seq_dict[i][name]), name=name, kmer=kmer,
                             results=results_path, order=order, med_len=med_len,
                             method=methods_list[method], label=cluster_dict[name]
-                            ) for name in seq_dict.keys()
+                            ) for name in seq_dict[i].keys()
         )
-        parallel_results.append(new_parallel_results)
+        parallel_results.extend(new_parallel_results)
     abs_fft_output = []
     fft_output = []
     cgr_output = []
     labels = []
-    for i in range(len(parallel_results)):
-        new_abs_fft_output, new_fft_output, new_cgr_output, new_labels = zip(*parallel_results[i])
-        abs_fft_output.append(new_abs_fft_output)
-        fft_output.append(new_fft_output)
-        cgr_output.append(new_cgr_output)
-        labels.append(new_labels)
+    new_abs_fft_output, new_fft_output, new_cgr_output, new_labels = zip(*parallel_results)
+    abs_fft_output.extend(new_abs_fft_output)
+    fft_output.extend(new_fft_output)
+    cgr_output.extend(new_cgr_output)
+    labels.extend(new_labels)
     # cgr_output is useless??
     log.write(f'Class sizes:\n')
     class_sizes = Counter(labels)
@@ -256,7 +255,6 @@ def startCalcProcess_train(train_set: Path, train_labels: Union[Path, str],
     if not to_json:
         out_fn = results_path.joinpath('dist_mat_train.npy').resolve()
         save(str(out_fn), distance_matrix)
-
     uprint('Performing classification .... \n', print_file=print_file)
     # ML classification
     smallest_class_count = class_sizes.most_common()[-1][1]

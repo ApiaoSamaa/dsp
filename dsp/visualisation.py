@@ -60,7 +60,8 @@ def plotCGR(cgr_output: ndarray, labels: tuple, seq_dict,
     unique_classes = set(labels)
     cgrFig, axs = plt.subplots(1,len(unique_classes),figsize=(28, 7))
     counter = 0
-    for value in unique_classes:
+    breakpoint()
+    for i, value in enumerate(unique_classes):
         subplot = axs[counter]
         index = labels.index(value)
         subplot.matshow(cgr_output[index],cmap=cm.gray_r, extent = extent)
@@ -70,7 +71,8 @@ def plotCGR(cgr_output: ndarray, labels: tuple, seq_dict,
         subplot.text(1,-0.1,"T",fontsize=15)
         subplot.text(-0.1,1.1,"C",fontsize=15)
         subplot.text(1,1.1,"G",fontsize=15)
-        log.write(f'CGR {value}: cgr_k={kmer}_{list(seq_dict.keys())[index]}.npy\n')
+        # log.write(f'CGR {value}: cgr_k={kmer}_{list(seq_dict[i].keys())[index]}.npy\n')
+        log.write(f'CGR {value}: cgr_k={kmer}\n')
         counter += 1
     buf = BytesIO() if to_json else out
     plt.tight_layout()

@@ -1,3 +1,7 @@
 DataBase/
 Dataset/
 d.py
+Results/
+Default_profile.prof
+*.pyc
+Links/
