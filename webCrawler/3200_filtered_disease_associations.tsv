@@ -1,0 +1,22 @@
+diseaseId	diseaseName	diseaseType	diseaseClass	diseaseSemanticType	NofGenes	NofPmids
+C0002395	Alzheimer's Disease	disease	C10;F03	Disease or Syndrome	3397	15526
+C0006142	Malignant neoplasm of breast	disease	C04;C17	Neoplastic Process	6941	33483
+C0006826	Malignant Neoplasms	group	C04	Neoplastic Process	8621	61580
+C0007131	Non-Small Cell Lung Carcinoma	disease	C04;C08	Neoplastic Process	3926	13910
+C0009402	Colorectal Carcinoma	disease	C06;C04	Neoplastic Process	5473	15769
+C0024623	Malignant neoplasm of stomach	disease	C06;C04	Neoplastic Process	3806	7920
+C0027627	Neoplasm Metastasis	phenotype	C23;C04	Neoplastic Process	6385	28641
+C0027651	Neoplasms	group	C04	Neoplastic Process	10161	104011
+C0178874	Tumor Progression	phenotype	C23	Neoplastic Process	3865	10568
+C0242379	Malignant neoplasm of lung	disease	C04;C08	Neoplastic Process	4173	11830
+C0376358	Malignant neoplasm of prostate	disease	C04;C12	Neoplastic Process	4502	14446
+C0596263	Carcinogenesis	phenotype	C23;C04	Neoplastic Process	6243	25476
+C0600139	Prostate carcinoma	disease	C04;C12	Neoplastic Process	4388	14292
+C0678222	Breast Carcinoma	disease	C04;C17	Neoplastic Process	6776	33239
+C0684249	Carcinoma of lung	disease	C04;C08	Neoplastic Process	4081	11217
+C0699791	Stomach Carcinoma	disease	C06;C04	Neoplastic Process	3720	8070
+C1269955	Tumor Cell Invasion	phenotype		Neoplastic Process	6626	27425
+C1306459	Primary malignant neoplasm	group	C04	Neoplastic Process	8221	51945
+C1306460	Primary malignant neoplasm of lung	disease	C04;C08	Neoplastic Process	3894	10732
+C2239176	Liver carcinoma	disease	C06;C04	Neoplastic Process	5725	15705
+C4722085	Malignant neoplasm of colon and/or rectum	disease		Neoplastic Process	3669	9738

@@ -29,7 +29,7 @@ from dsp.utils import Logger, uprint, PathAction, HandleSpaces
 from dsp.visualisation import plotCGR, plot3d, \
     displayConfusionMatrix
 
-from tryCSV import train_path, train_label_path
+from create_label_csv import train_path, train_label_path
 
 def startCalcProcess_test(query_seq_path: Path, run_name: str,
                           output_directory: Union[Path, str],

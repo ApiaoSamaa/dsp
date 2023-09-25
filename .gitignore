@@ -5,3 +5,11 @@ Results/
 Default_profile.prof
 *.pyc
 Links/
+DData/
+node_modules/
+webCrawler/*.go
+example.png
+package-lock.json
+package.json
+readme.md
+requirements.txt

@@ -60,7 +60,6 @@ def plotCGR(cgr_output: ndarray, labels: tuple, seq_dict,
     unique_classes = set(labels)
     cgrFig, axs = plt.subplots(1,len(unique_classes),figsize=(28, 7))
     counter = 0
-    breakpoint()
     for i, value in enumerate(unique_classes):
         subplot = axs[counter]
         index = labels.index(value)
